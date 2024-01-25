@@ -7,8 +7,7 @@ Basic python script for parcing prices from Steam market.
 4. Install python
 5. Open cmd, go to the directory with script (and .txt file) and run pip install -r requirements.txt
 6. Open code by writing in cmd python csparcer.py
-
-#Important notes
+##Important notes
 1. There is a limit on requests to the Steam market, the code automatically will sent you on a cooldown in most cases, but if you see too many timeout errors - just wait ~5 min and restart the script.
 2. Script automatically creates and updates excel file please DO NOT rename it.
 

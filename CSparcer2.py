@@ -18,7 +18,7 @@ def close_excel():
 
 close_excel()
 
-filename = "parcedstickers.xlsx"
+filename = "ParcedFromTxt.xlsx"
 
 if os.path.isfile(filename):
     wb = openpyxl.load_workbook(filename)

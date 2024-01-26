@@ -1,4 +1,5 @@
 import os
+import subprocess
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import json
@@ -25,12 +26,11 @@ def get_category_type(item_type):
 
 items_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "items.txt")
 if os.path.exists(items_file_path):
-    print("items.txt file found. Parsing links from the file...")
-    with open(items_file_path, "r") as items_file:
-        urls = items_file.read().splitlines()
+    print("items.txt file found. Parsing links from it")
+    subprocess.run(["python", "CSparcer2.py"])
 else:
     num_items = int(input("Enter the number of links to parse: "))
-    item_type = input("Enter the item type for parsing (knives, gloves, or both): ").lower()
+    item_type = input("Enter the item type for parsing (knives, gloves, both (knives or gloves) or stickers): ").lower()
     category_type = get_category_type(item_type)
     if item_type == "stickers":
         link = f'https://steamcommunity.com/market/search/render/?query=&start=0&count={num_items}&search_descriptions=0&sort_column=quantity&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_StickerCategory%5B%5D=tag_PlayerSignature&category_730_StickerCategory%5B%5D=tag_TeamLogo&category_730_StickerCategory%5B%5D=tag_Tournament&appid=730'

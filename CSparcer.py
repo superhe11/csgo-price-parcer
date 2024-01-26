@@ -18,27 +18,41 @@ def get_category_type(item_type):
         return "tag_CSGO_Type_Knife"
     elif item_type == "gloves":
         return "tag_Type_Hands&appid=730"
+    elif item_type == "stickers":
+        return "tag_TeamLogo&appid=730#p1_quantity_desc"
     else:
         return "tag_CSGO_Type_Knife&category_730_Type%5B%5D=tag_Type_Hands&appid=730"
 
-num_items = int(input("Enter the number of links to parse: "))
-item_type = input("Enter the item type for parsing (knives, gloves, or both): ").lower()
-category_type = get_category_type(item_type)
+items_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "items.txt")
+if os.path.exists(items_file_path):
+    print("items.txt file found. Parsing links from the file...")
+    with open(items_file_path, "r") as items_file:
+        urls = items_file.read().splitlines()
+else:
+    num_items = int(input("Enter the number of links to parse: "))
+    item_type = input("Enter the item type for parsing (knives, gloves, or both): ").lower()
+    category_type = get_category_type(item_type)
+    if item_type == "stickers":
+        link = f'https://steamcommunity.com/market/search/render/?query=&start=0&count={num_items}&search_descriptions=0&sort_column=quantity&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_StickerCategory%5B%5D=tag_PlayerSignature&category_730_StickerCategory%5B%5D=tag_TeamLogo&category_730_StickerCategory%5B%5D=tag_Tournament&appid=730'
+    else:
+        link = f'https://steamcommunity.com/market/search/render/?query=&start=0&count={num_items}&search_descriptions=0&sort_column=price&sort_dir=asc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Type%5B%5D={category_type}'
+    page = urlopen(link)
+    data = json.loads(page.read().decode())
+    html = data['results_html']
+    bs_page = BeautifulSoup(html, features="html.parser")
+    objects = bs_page.findAll(class_="market_listing_row_link")
 
-link = f'https://steamcommunity.com/market/search/render/?query=&start=0&count={num_items}&search_descriptions=0&sort_column=price&sort_dir=asc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Type%5B%5D={category_type}'
-page = urlopen(link)
-data = json.loads(page.read().decode())
-html = data['results_html']
-bs_page = BeautifulSoup(html, features="html.parser")
-objects = bs_page.findAll(class_="market_listing_row_link")
+    urls = []
 
-urls = []
+    for g in objects:
+     link = g["href"]
+     price = g.find('span', {'data-price': True}).text
+     urls.append(link)
+     print(f"{price} | {link}")
+    
 
-for g in objects:
-    link = g["href"]
-    price = g.find('span', {'data-price': True}).text
-    urls.append(link)
-    print(f"{price} | {link}")
+if not urls:
+    print("Steam API servers are currently overloaded (or you just got a ~15min ban for requesting too much)")
 
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
@@ -52,6 +66,7 @@ chrome_driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "c
 service = Service(executable_path=chrome_driver_path)
 
 driver = webdriver.Chrome(service=service, options=options)
+
 
 def extract_number(text):
     return float(''.join(filter(str.isdigit, text))) / 100
@@ -97,6 +112,9 @@ for url in urls:
         for remaining_time in range(270, 0, -5):
             time.sleep(5)
             print(f"Remaining time: {remaining_time}sec...")
+
+
+
 
 driver.quit()
 
